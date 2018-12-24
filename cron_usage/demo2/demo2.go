@@ -7,7 +7,7 @@ import (
 	"github.com/gorhill/cronexpr"
 )
 
-// cron任务
+//CronJob任务
 type CronJob struct {
 	expr     *cronexpr.Expression
 	nextTime time.Time // expr.Next(now)
