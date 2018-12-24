@@ -15,15 +15,17 @@ func main() {
 		kv      clientv3.KV
 		putResp *clientv3.PutResponse
 	)
+	// 客户端配置
 	config = clientv3.Config{
 		Endpoints:   []string{"127.0.0.1:2379"},
 		DialTimeout: 5 * time.Second,
 	}
+	// 建立客户端
 	if client, err = clientv3.New(config); err != nil {
 		fmt.Println("clientv3 new err: ", err)
 		return
 	}
-
+	// 用于读写etcd键值对
 	kv = clientv3.NewKV(client)
 	if putResp, err = kv.Put(context.TODO(), "/cron/jobs/job1", "hello", clientv3.WithPrevKV()); err != nil {
 		fmt.Println("put err: ", err)
