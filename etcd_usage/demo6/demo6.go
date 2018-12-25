@@ -17,6 +17,8 @@ func main() {
 		leaseId        clientv3.LeaseID
 		putResp        *clientv3.PutResponse
 		getResp        *clientv3.GetResponse
+		keepResp       *clientv3.LeaseKeepAliveResponse
+		keepRespChan   <-chan *clientv3.LeaseKeepAliveResponse
 		kv             clientv3.KV
 	)
 	// 客户端配置
@@ -39,6 +41,26 @@ func main() {
 	}
 	// 租约ID
 	leaseId = leaseGrantResp.ID
+	// 租约续租 续租5s后停止续租，总共15s的生命期
+	// ctx, _ := context.WithTimeout(context.TODO(), 5 * time.Second)
+	if keepRespChan, err = lease.KeepAlive(context.TODO(), leaseId); err != nil {
+		fmt.Println("lease keep alive err:", err)
+		return
+	}
+	go func() {
+		for {
+			select {
+			case keepResp = <-keepRespChan:
+				if keepRespChan == nil {
+					fmt.Println("租约已经失效")
+					return
+				} else {
+					fmt.Println("收到自动续租应答")
+				}
+			}
+		}
+	}()
+
 	// 获得kv对象
 	kv = clientv3.NewKV(client)
 	// Put一个kv，与租约关联，从而实现10s后自动过期
