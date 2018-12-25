@@ -47,17 +47,29 @@ func main() {
 		fmt.Println("kv get err:", err)
 		return
 	}
+
 	// 当前key存在
 	if len(getResp.Kvs) != 0 {
 		fmt.Println("当前值:", string(getResp.Kvs[0].Value))
 	}
+
 	// 当前etcd集群事务ID，单调递增
 	watchStartRevision = getResp.Header.Revision + 1
+
 	// 创建watcher
 	watcher = clientv3.NewWatcher(client)
+
 	// 启动监听
 	fmt.Println("从该版本向后监听:", watchStartRevision)
-	watchRespChan = watcher.Watch(context.TODO(), "/cron/jobs/job7", clientv3.WithRev(watchStartRevision))
+
+	// 5s后取消任务
+	ctx, cancelFunc := context.WithCancel(context.TODO())
+	time.AfterFunc(10*time.Second, func() {
+		cancelFunc()
+	})
+
+	watchRespChan = watcher.Watch(ctx, "/cron/jobs/job7", clientv3.WithRev(watchStartRevision))
+
 	// 处理kv变化事件
 	for watchResp = range watchRespChan {
 		for _, event = range watchResp.Events {
@@ -69,4 +81,5 @@ func main() {
 			}
 		}
 	}
+
 }
