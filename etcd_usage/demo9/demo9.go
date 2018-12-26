@@ -89,10 +89,10 @@ func main() {
 		fmt.Println("锁被占用:", string(txnResp.Responses[0].GetResponseRange().Kvs[0].Value))
 		return
 	}
-	fmt.Println("处理任务")
-	time.Sleep(10 * time.Second)
 
 	// 2. 处理业务
+	fmt.Println("处理任务")
+	time.Sleep(10 * time.Second)
 
 	// 3. 释放锁(取消自动续租，释放租约)
 	// defer
