@@ -12,8 +12,7 @@ func main() {
 	var (
 		client *mongo.Client
 		db     *mongo.Database
-		// collection *mongo.Collection
-		err error
+		err    error
 	)
 	// 1.建立连接
 	if client, err = mongo.Connect(context.TODO(), "mongodb://127.0.0.1:27017", options.Client().SetConnectTimeout(5*time.Second)); err != nil {
