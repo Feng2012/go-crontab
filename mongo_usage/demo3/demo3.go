@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
-
 	"github.com/mongodb/mongo-go-driver/mongo"
 	"github.com/mongodb/mongo-go-driver/mongo/options"
 	"time"
@@ -30,7 +29,7 @@ func main() {
 		client     *mongo.Client
 		db         *mongo.Database
 		collection *mongo.Collection
-		res        *mongo.InsertOneResult
+		res        *mongo.InsertManyResult
 		err        error
 	)
 
@@ -46,7 +45,7 @@ func main() {
 	// 3.选择(或创建)collection
 	collection = db.Collection("log")
 
-	// 4.插入记录(bson)
+	// 4.记录(bson)
 	record := &LogRecord{
 		JobName:   "job10",
 		Command:   "echo hello",
@@ -54,11 +53,16 @@ func main() {
 		Content:   "hello",
 		TimePoint: TimePoint{StartTime: time.Now().Unix(), EndTime: time.Now().Unix() + 10},
 	}
-	if res, err = collection.InsertOne(context.TODO(), record); err != nil {
-		fmt.Println("insert error:", err)
+
+	// 5.批量插入多条document
+	logArr := []interface{}{record, record, record}
+	if res, err = collection.InsertMany(context.TODO(), logArr); err != nil {
+		fmt.Println("insert many error:", err)
 		return
 	}
 
-	docId := res.InsertedID.(primitive.ObjectID)
-	fmt.Println("自增ID:", docId.Hex())
+	for _, insertId := range res.InsertedIDs {
+		docId := insertId.(primitive.ObjectID)
+		fmt.Println("自增ID:", docId.Hex())
+	}
 }
