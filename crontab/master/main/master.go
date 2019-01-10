@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go-crontab/crontab/master"
 	"runtime"
+	"time"
 )
 
 var (
@@ -40,11 +41,19 @@ func main() {
 		goto ERR
 	}
 
+	// 任务管理器
+	if err = master.InitJobManager(); err != nil {
+		fmt.Println(err)
+		goto ERR
+	}
+
 	// 启动api http服务
 	if err = master.InitApiServer(); err != nil {
 		goto ERR
 	}
-
+	for {
+		time.Sleep(1 * time.Second)
+	}
 	return
 
 ERR:
